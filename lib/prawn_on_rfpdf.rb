@@ -24,55 +24,55 @@ class PrawnOnRFPDF
   # http://chensh.loxa.edu.tw/php/X_1.php
   def fix_big5_binary(org_str)
 
-     tmp_length = org_str.length
+    tmp_length = org_str.length
 
-     (0...tmp_length).to_a.each do |tmp_i|
+    (0...tmp_length).to_a.each do |tmp_i|
 
-       ascii_str_a = org_str[tmp_i,1]
-       ascii_str_b = org_str[tmp_i+1, 1]
-       ascii_str_c = org_str[tmp_i-1, 1] if tmp_i > 0
+      ascii_str_a = org_str[tmp_i,1]
+      ascii_str_b = org_str[tmp_i+1, 1]
+      ascii_str_c = org_str[tmp_i-1, 1] if tmp_i > 0
 
-       ascii_value_a = ascii_str_a.ord if ascii_str_a
-       ascii_value_b = ascii_str_b.ord if ascii_str_b
-       ascii_value_c = ascii_str_c.ord if ascii_str_c
+      ascii_value_a = ascii_str_a.ord if ascii_str_a
+      ascii_value_b = ascii_str_b.ord if ascii_str_b
+      ascii_value_c = ascii_str_c.ord if ascii_str_c
 
-       if ( ascii_value_a && ascii_value_a >= 129 && ascii_value_a <= 254 ) &&
-            ascii_value_b && (
-           ( ascii_value_b >= 64 && ascii_value_b <= 126 ) || ( ascii_value_b >= 161 && ascii_value_b <= 254 )
-         )
+      if ( ascii_value_a && ascii_value_a >= 129 && ascii_value_a <= 254 ) &&
+        ascii_value_b && (
+          ( ascii_value_b >= 64 && ascii_value_b <= 126 ) || ( ascii_value_b >= 161 && ascii_value_b <= 254 )
+      )
 
-         # this is valid big5 character first byte
-         #puts "1: #{ascii_value_a}"
+      # this is valid big5 character first byte
+      #puts "1: #{ascii_value_a}"
 
-         if ( ascii_value_b == 92 )
-           #puts "ascii_value_b==92"
-           org_str.insert( tmp_i+2 ,"\\" )
-           #puts @icutf8.iconv( org_str )
-           tmp_length = org_str.length
-         end
+      if ( ascii_value_b == 92 )
+        #puts "ascii_value_b==92"
+        org_str.insert( tmp_i+2 ,"\\" )
+        #puts @icutf8.iconv( org_str )
+        tmp_length = org_str.length
+      end
 
-       elsif ( ascii_value_c && ascii_value_c >= 129 && ascii_value_c <= 254 ) &&
-               ascii_value_a && (
-              ( ascii_value_a >= 64 && ascii_value_a <= 126 ) || ( ascii_value_a >= 161 && ascii_value_a <= 254 )
-            )
-         # this is valid big5 characer second byte
-         #puts "2: #{ascii_value_a}"
-       elsif ascii_value_a && ascii_value_a >= 32 && ascii_value_a <= 126
-         # this is valid print-able ascii
-         #puts "3: #{ascii_value_a}"
-       else
-         # this is invalid byte
-         #puts "4: invalid #{ascii_value_a}"
-         org_str[tmp_i,1] = "?"
-       end
-     end
+      elsif ( ascii_value_c && ascii_value_c >= 129 && ascii_value_c <= 254 ) &&
+        ascii_value_a && (
+          ( ascii_value_a >= 64 && ascii_value_a <= 126 ) || ( ascii_value_a >= 161 && ascii_value_a <= 254 )
+      )
+      # this is valid big5 characer second byte
+      #puts "2: #{ascii_value_a}"
+      elsif ascii_value_a && ascii_value_a >= 32 && ascii_value_a <= 126
+        # this is valid print-able ascii
+        #puts "3: #{ascii_value_a}"
+      else
+        # this is invalid byte
+        #puts "4: invalid #{ascii_value_a}"
+        org_str[tmp_i,1] = "?"
+      end
+    end
 
-     tmp_length = org_str.length
-     if ( org_str[tmp_length-1, 1] == "\\" )
-       org_str.concat(" ")
-     end
+    tmp_length = org_str.length
+    if ( org_str[tmp_length-1, 1] == "\\" )
+      org_str.concat(" ")
+    end
 
-     return org_str
+    return org_str
 
   end
 
@@ -86,7 +86,7 @@ class PrawnOnRFPDF
     s.gsub!("（","(")
     s.gsub!("）",")")
 
-    s = @icBig5.iconv(s) rescue s.chars.map { |c| @icBig5.iconv(c) rescue '?' }.join("")
+    s = @icBig5.iconv(s) rescue s.split("").map { |c| @icBig5.iconv(c) rescue '?' }.join("")
     s = fix_big5_binary(s)
 
     return s
@@ -103,12 +103,12 @@ class PrawnOnRFPDF
     align = options[:align] || "L"
     disable_auto_line_break = options[:disable_auto_line_break] || false
 
-  	@pdf.SetFont('Big5','', font_size)
+    @pdf.SetFont('Big5','', font_size)
 
-  	if !w && align == "L"
-  	  text = safe_big5_iconv(text.to_s)
-  	  @pdf.SetXY( x + @relative[0], y + @relative[1])
-  	  @pdf.Write(0, text.to_s )
+    if !w && align == "L"
+      text = safe_big5_iconv(text.to_s)
+      @pdf.SetXY( x + @relative[0], y + @relative[1])
+      @pdf.Write(0, text.to_s )
     else
       big5_string_array = split_to_array(text.to_s, w)
 
@@ -140,7 +140,7 @@ class PrawnOnRFPDF
     @pdf.SetFont( RAILS_ROOT+"/vendor/plugins/rfpdf/lib/fpdf/3of9",'', font_size)
     @pdf.SetXY( x + @relative[0], y + @relative[1])
 
-  	@pdf.Write(0, "*#{text}*")
+    @pdf.Write(0, "*#{text}*")
 
   end
 
@@ -318,24 +318,24 @@ class PrawnOnRFPDF
   protected
 
   def calculate_string(text, width)
-     big5_text = safe_big5_iconv( text.to_s )
-     big5_text_width = @pdf.GetStringWidth(big5_text)
+    big5_text = safe_big5_iconv( text.to_s )
+    big5_text_width = @pdf.GetStringWidth(big5_text)
 
-     if big5_text_width > width
-       reserve_percent = width / big5_text_width
-       text_size = text.mb_chars.size
+    if big5_text_width > width
+      reserve_percent = width / big5_text_width
+      text_size = text.mb_chars.size
 
-       restrict_size = (text_size*reserve_percent).floor.to_i
+      restrict_size = (text_size*reserve_percent).floor.to_i
 
-       restrict_big5_text = safe_big5_iconv( text.mb_chars[0, restrict_size] )
-       while @pdf.GetStringWidth(restrict_big5_text) > width
-         restrict_size = restrict_size - 1
-         restrict_big5_text = safe_big5_iconv( text.mb_chars[0, restrict_size] )
-       end
+      restrict_big5_text = safe_big5_iconv( text.mb_chars[0, restrict_size] )
+      while @pdf.GetStringWidth(restrict_big5_text) > width
+        restrict_size = restrict_size - 1
+        restrict_big5_text = safe_big5_iconv( text.mb_chars[0, restrict_size] )
+      end
 
-       remained_text = (text && text.mb_chars.size > 0 )? text.mb_chars[restrict_size, text.mb_chars.size - restrict_size ] : nil
+      remained_text = (text && text.mb_chars.size > 0 )? text.mb_chars[restrict_size, text.mb_chars.size - restrict_size ] : nil
 
-       return restrict_big5_text, remained_text
+      return restrict_big5_text, remained_text
     else
 
       return big5_text, nil
